@@ -1,7 +1,22 @@
-
 import { GoogleGenAI } from '@google/genai';
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 
-export default async function handler(request, response) {
+interface ChatHistoryItem {
+  role: 'user' | 'model';
+  text: string;
+}
+
+interface ChatRequestBody {
+  message: string;
+  history: ChatHistoryItem[];
+  context: {
+    metrics: any;
+    platform: string;
+    dateRange: { start: string; end: string };
+  };
+}
+
+export default async function handler(request: VercelRequest, response: VercelResponse) {
   if (request.method !== 'POST') {
     return response.status(405).json({ error: 'Method Not Allowed' });
   }
@@ -12,7 +27,7 @@ export default async function handler(request, response) {
   }
 
   try {
-    const { message, history, context } = request.body;
+    const { message, history, context } = request.body as ChatRequestBody;
 
     const ai = new GoogleGenAI({ apiKey });
     
@@ -30,13 +45,8 @@ export default async function handler(request, response) {
       Answer in Thai unless asked otherwise. Be concise and data-driven.
     `;
 
-    // Initialize chat with history
-    // Note: In a stateless function, we recreate the chat context each time.
-    // For simple interactions, we can just send the full history as contents or use the SDK's chat feature if we mapped history correctly.
-    // Here we will use generateContent with the system instruction + history + new message for simplicity in a REST stateless way.
-
     const contents = [
-      ...history.map(msg => ({
+      ...history.map((msg: ChatHistoryItem) => ({
         role: msg.role,
         parts: [{ text: msg.text }]
       })),

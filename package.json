@@ -19,6 +19,7 @@
     "@types/node": "^20.11.0",
     "@types/react": "^18.3.1",
     "@types/react-dom": "^18.3.1",
+    "@vercel/node": "^3.0.0",
     "@vitejs/plugin-react": "^4.2.1",
     "autoprefixer": "^10.4.19",
     "postcss": "^8.4.38",
@@ -27,6 +28,6 @@
     "vite": "^5.2.0"
   },
   "engines": {
-    "node": "24.x"
+    "node": "20.x"
   }
 }

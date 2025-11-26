@@ -1,18 +1,49 @@
-
 import { GoogleGenAI } from '@google/genai';
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 
-export default async function handler(request, response) {
+// Define the structure for URL items returned by grounding
+interface UrlItem {
+  url: string;
+  title?: string;
+}
+
+// Define the success response structure
+interface AnalysisResponse {
+  text: string;
+  urls: UrlItem[];
+}
+
+// Define the error response structure
+interface ErrorResponse {
+  error: string;
+}
+
+// Define the expected request body structure
+interface AnalyzeRequestBody {
+  metrics: {
+    totalReach: number;
+    totalEngagement: number;
+    engagementRate: number;
+    topPostType: string;
+  };
+  platform: string;
+  startDate: string;
+  endDate: string;
+}
+
+export default async function handler(request: VercelRequest, response: VercelResponse) {
   if (request.method !== 'POST') {
-    return response.status(405).json({ error: 'Method Not Allowed' });
+    return response.status(405).json({ error: 'Method Not Allowed' } as ErrorResponse);
   }
 
   const apiKey = process.env.API_KEY;
   if (!apiKey) {
-    return response.status(500).json({ error: 'Server configuration error: Missing API Key' });
+    return response.status(500).json({ error: 'Server configuration error: Missing API Key' } as ErrorResponse);
   }
 
   try {
-    const { metrics, platform, startDate, endDate } = request.body;
+    // Type assertion for the request body
+    const { metrics, platform, startDate, endDate } = request.body as AnalyzeRequestBody;
 
     const ai = new GoogleGenAI({ apiKey });
     
@@ -45,20 +76,38 @@ export default async function handler(request, response) {
       }
     });
 
-    const urls = [];
-    if (result.candidates?.[0]?.groundingMetadata?.groundingChunks) {
-      result.candidates[0].groundingMetadata.groundingChunks.forEach((chunk) => {
-        if (chunk.web?.uri) urls.push(chunk.web.uri);
+    const urls: UrlItem[] = [];
+    
+    // Safely access and iterate grounding chunks with type checking
+    const groundingChunks = result.candidates?.[0]?.groundingMetadata?.groundingChunks;
+    
+    if (groundingChunks && Array.isArray(groundingChunks)) {
+      groundingChunks.forEach((chunk: any) => {
+        if (chunk.web?.uri) {
+          urls.push({
+            url: chunk.web.uri,
+            title: chunk.web.title || chunk.web.uri
+          });
+        }
       });
     }
 
-    return response.status(200).json({ 
-      text: result.text || "Unable to generate analysis.",
-      urls: Array.from(new Set(urls))
-    });
+    // Deduplicate URLs based on the unique URL string
+    const uniqueUrls = Array.from(new Map(urls.map(item => [item.url, item])).values());
 
-  } catch (error) {
+    // Construct the type-safe response
+    const responseData: AnalysisResponse = { 
+      text: result.text || "Unable to generate analysis.",
+      urls: uniqueUrls
+    };
+
+    return response.status(200).json(responseData);
+
+  } catch (error: any) {
     console.error("API Analysis Error:", error);
-    return response.status(500).json({ error: 'Failed to process analysis' });
+    const errorResponse: ErrorResponse = { 
+      error: error.message || 'Failed to process analysis' 
+    };
+    return response.status(500).json(errorResponse);
   }
 }

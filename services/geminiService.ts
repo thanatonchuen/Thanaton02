@@ -1,5 +1,4 @@
-
-import { AggregateMetrics, Platform, ChatMessage } from "../types";
+import { AggregateMetrics, Platform, ChatMessage, UrlItem } from "../types";
 
 /**
  * Analyzes social media metrics by calling the server-side API.
@@ -9,7 +8,7 @@ export const analyzeSocialInsights = async (
   platform: Platform,
   startDate: string,
   endDate: string
-): Promise<{ text: string, urls: string[] }> => {
+): Promise<{ text: string, urls: UrlItem[] }> => {
   
   try {
     const response = await fetch('/api/analyze', {

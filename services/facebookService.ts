@@ -1,5 +1,14 @@
-
 import { DailyMetric } from "../types";
+
+interface FacebookDayItem {
+  value: number;
+  end_time: string;
+}
+
+interface FacebookInsightMetric {
+  name: string;
+  values: FacebookDayItem[];
+}
 
 /**
  * Fetches real Facebook Page Insights by calling the server-side API.
@@ -20,15 +29,15 @@ export const fetchRealFacebookData = async (
     
     if (!insightsData.data || insightsData.data.length === 0) return null;
 
-    // Process Data into DailyMetric[] (Same logic as before, but now data comes from our proxy)
-    const reachSeries = insightsData.data.find((m: any) => m.name === 'page_impressions_unique')?.values || [];
-    const engagementSeries = insightsData.data.find((m: any) => m.name === 'page_post_engagements')?.values || [];
+    // Process Data into DailyMetric[] with types
+    const reachSeries: FacebookDayItem[] = insightsData.data.find((m: FacebookInsightMetric) => m.name === 'page_impressions_unique')?.values || [];
+    const engagementSeries: FacebookDayItem[] = insightsData.data.find((m: FacebookInsightMetric) => m.name === 'page_post_engagements')?.values || [];
 
-    const processedData: DailyMetric[] = reachSeries.map((dayItem: any) => {
+    const processedData: DailyMetric[] = reachSeries.map((dayItem: FacebookDayItem) => {
       const dateStr = dayItem.end_time.split('T')[0];
       
       const reach = dayItem.value || 0;
-      const engagement = engagementSeries.find((d: any) => d.end_time === dayItem.end_time)?.value || 0;
+      const engagement = engagementSeries.find((d: FacebookDayItem) => d.end_time === dayItem.end_time)?.value || 0;
       
       const estimatedLikes = Math.floor(engagement * 0.85); 
       const estimatedShares = Math.floor(engagement * 0.10);

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, Users, MessageCircle, Share2, BarChart3, RefreshCw, Sun, Moon } from 'lucide-react';
+import { LayoutDashboard, Users, MessageCircle, Share2, BarChart3, RefreshCw, Sun, Moon, Menu } from 'lucide-react';
 import { StatCard } from './components/StatCard';
 import { InsightPanel } from './components/InsightPanel';
 import { ChatInterface } from './components/ChatInterface';
@@ -133,7 +133,18 @@ const App: React.FC = () => {
               <p className="text-sm text-gray-500 dark:text-slate-400">{isRealData ? 'Live Data' : 'Simulated Data'}</p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
+             <div className="hidden md:flex bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-1">
+              {(['all', 'facebook', 'instagram'] as Platform[]).map((p: Platform) => (
+                <button 
+                  key={p} 
+                  onClick={() => setPlatform(p)}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-md capitalize transition-colors ${platform === p ? 'bg-indigo-50 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'}`}
+                >
+                  {p}
+                </button>
+              ))}
+            </div>
             <button
               onClick={toggleTheme}
               className="p-2 rounded-full bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-300 hover:shadow-md transition-all focus:outline-none"
@@ -148,6 +159,9 @@ const App: React.FC = () => {
             >
               <RefreshCw size={16} className={isDataLoading ? "animate-spin" : ""}/> Refresh
             </button>
+             <button className="md:hidden p-2 rounded-md border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-600 dark:text-slate-300">
+               <Menu size={20} />
+             </button>
           </div>
         </header>
 

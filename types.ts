@@ -19,10 +19,15 @@ export interface AggregateMetrics {
   topPostType: string;
 }
 
+export interface UrlItem {
+  url: string;
+  title?: string;
+}
+
 export interface AnalysisState {
   isLoading: boolean;
   result: string | null;
-  groundingUrls: string[];
+  groundingUrls: UrlItem[];
   error: string | null;
 }
 

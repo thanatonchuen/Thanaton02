@@ -1,36 +1,24 @@
 import React from 'react';
-import { ArrowUpRight, ArrowDownRight, Minus } from 'lucide-react';
 
 interface StatCardProps {
   title: string;
-  value: string;
-  change?: number; // percentage change
-  icon: React.ReactNode;
-  colorClass?: string;
+  value: string | number;
+  icon?: React.ReactNode;
+  change?: number;
 }
 
-export const StatCard: React.FC<StatCardProps> = ({ title, value, change, icon, colorClass }) => {
-  const isPositive = change && change > 0;
-  const isNegative = change && change < 0;
+export const StatCard: React.FC<StatCardProps> = ({ title, value, icon, change }) => {
+  const changeColor = change && change >= 0 ? 'text-green-500' : 'text-red-500';
+  const changeSign = change && change >= 0 ? '+' : '';
   
-  // Use provided colorClass or default to a neutral gray background if not provided
-  const bgClass = colorClass || 'bg-slate-100 text-slate-600';
-
   return (
-    <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
-      <div className="flex justify-between items-start mb-4">
-        <div className={`p-3 rounded-lg ${bgClass} bg-opacity-10 text-opacity-100`}>
-          {icon}
-        </div>
-        {change !== undefined && (
-          <div className={`flex items-center text-sm font-medium ${isPositive ? 'text-green-600' : isNegative ? 'text-red-600' : 'text-slate-500'}`}>
-            {isPositive ? <ArrowUpRight size={16} /> : isNegative ? <ArrowDownRight size={16} /> : <Minus size={16} />}
-            <span className="ml-1">{Math.abs(change)}%</span>
-          </div>
-        )}
+    <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-md p-4 border border-gray-100 dark:border-slate-700 flex items-center justify-between hover:shadow-lg transition-all duration-200">
+      <div>
+        <p className="text-sm text-gray-500 dark:text-slate-400">{title}</p>
+        <p className="text-xl font-semibold text-gray-900 dark:text-white mt-1">{value}</p>
+        {change !== undefined && <span className={`${changeColor} text-xs mt-1 block font-medium`}>{changeSign}{change}%</span>}
       </div>
-      <h3 className="text-slate-500 text-sm font-medium mb-1">{title}</h3>
-      <p className="text-2xl font-bold text-slate-900">{value}</p>
+      {icon && <div className="text-gray-400 dark:text-slate-500 bg-gray-50 dark:bg-slate-700/50 p-2 rounded-lg">{icon}</div>}
     </div>
   );
 };
